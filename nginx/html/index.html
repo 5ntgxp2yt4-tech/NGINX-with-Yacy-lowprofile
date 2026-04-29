@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Local Privacy Gateway</title>
+  <style>
+    :root {
+      --bg: #f3efe6;
+      --panel: rgba(255, 255, 255, 0.82);
+      --ink: #1f2328;
+      --muted: #5f6b76;
+      --line: rgba(31, 35, 40, 0.10);
+      --accent: #0d6e6e;
+      --accent-2: #b85c38;
+      --shadow: 0 24px 70px rgba(31, 35, 40, 0.12);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, rgba(184, 92, 56, 0.18), transparent 28%),
+        radial-gradient(circle at top right, rgba(13, 110, 110, 0.18), transparent 30%),
+        linear-gradient(180deg, #f8f3ec, var(--bg));
+      font-family: Georgia, "Times New Roman", serif;
+    }
+    .wrap {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 48px 20px 64px;
+    }
+    .hero {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 28px;
+      padding: 32px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+    }
+    h1 {
+      margin: 0 0 12px;
+      font-size: clamp(2.3rem, 5vw, 4.5rem);
+      line-height: 0.95;
+      letter-spacing: -0.04em;
+    }
+    p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 1.05rem;
+      line-height: 1.65;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 18px;
+      margin-top: 26px;
+    }
+    .card {
+      background: rgba(255, 255, 255, 0.92);
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      padding: 22px;
+      box-shadow: var(--shadow);
+    }
+    .card h2 {
+      margin: 0 0 8px;
+      font-size: 1.35rem;
+    }
+    .meta {
+      color: var(--muted);
+      font-size: 0.95rem;
+      margin-bottom: 18px;
+    }
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .btn {
+      display: inline-block;
+      text-decoration: none;
+      color: white;
+      background: var(--accent);
+      border-radius: 999px;
+      padding: 10px 16px;
+      font-size: 0.95rem;
+    }
+    .btn.alt { background: var(--accent-2); }
+    code {
+      font-family: Consolas, "Courier New", monospace;
+      background: rgba(31, 35, 40, 0.06);
+      padding: 2px 6px;
+      border-radius: 6px;
+    }
+    .search-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 14px;
+    }
+    .search-row input[type=text] {
+      flex: 1;
+      padding: 9px 14px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      font-size: 0.95rem;
+      font-family: inherit;
+      outline: none;
+    }
+    .search-row input[type=text]:focus {
+      border-color: var(--accent);
+    }
+    .search-row button {
+      padding: 9px 18px;
+      border: none;
+      border-radius: 999px;
+      background: var(--accent);
+      color: white;
+      font-size: 0.95rem;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .search-tabs {
+      display: flex;
+      gap: 6px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+    .search-tab {
+      padding: 5px 14px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: transparent;
+      font-size: 0.88rem;
+      cursor: pointer;
+      font-family: inherit;
+      color: var(--muted);
+    }
+    .search-tab.active {
+      background: var(--accent);
+      color: white;
+      border-color: var(--accent);
+    }
+    .footer {
+      margin-top: 18px;
+      font-size: 0.92rem;
+      color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="hero">
+      <h1>Local Privacy Gateway</h1>
+      <p>This nginx front end keeps the local surface simple: HTTPS only, one origin, and a YaCy route that stays inside the private container network.</p>
+      <div class="grid">
+        <article class="card">
+          <h2>YaCy</h2>
+          <div class="meta">Search server behind <code>/yacy/</code></div>
+          <div class="search-tabs">
+            <button class="search-tab active" onclick="setYacyTab(this,'text')">Web</button>
+            <button class="search-tab" onclick="setYacyTab(this,'video')">Video</button>
+            <button class="search-tab" onclick="setYacyTab(this,'image')">Image</button>
+          </div>
+          <div class="search-row">
+            <input type="text" id="yacy-q" placeholder="Search YaCy..." onkeydown="if(event.key==='Enter')doYacySearch()">
+            <button onclick="doYacySearch()">Search</button>
+          </div>
+          <div class="actions" style="margin-top:12px">
+            <a class="btn" href="/yacy/">Open YaCy UI</a>
+            <a class="btn alt" href="/health/yacy">Health Check</a>
+          </div>
+        </article>
+        <article class="card">
+          <h2>Privacy boundary</h2>
+          <div class="meta">What this repo is designed to keep hidden</div>
+          <p>YaCy fetches leave through Privoxy and Tor. nginx does not publish plaintext ports, and the repo excludes runtime data, TLS keys, and bridge credentials.</p>
+        </article>
+      </div>
+      <div class="footer">If you want more apps behind this same origin later, add them as separate proxy locations in <code>nginx/default.conf</code>.</div>
+    </section>
+  </div>
+  <script>
+    var _yacyDom = 'text';
+    function setYacyTab(el, dom) {
+      _yacyDom = dom;
+      document.querySelectorAll('.search-tab').forEach(function(t) { t.classList.remove('active'); });
+      el.classList.add('active');
+    }
+    function doYacySearch() {
+      var q = document.getElementById('yacy-q').value.trim();
+      if (!q) return;
+      window.open('/yacy/yacysearch.html?query=' + encodeURIComponent(q) + '&contentdom=' + _yacyDom + '&resource=local', '_blank');
+    }
+  </script>
+</body>
+</html>

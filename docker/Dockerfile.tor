@@ -1,0 +1,6 @@
+FROM alpine:latest
+RUN apk add --no-cache tor lyrebird
+RUN mkdir -p /etc/tor /var/lib/tor && chmod 700 /var/lib/tor
+COPY torrc /etc/tor/
+EXPOSE 9050 9051
+CMD ["tor", "-f", "/etc/tor/torrc"]
